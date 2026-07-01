@@ -22,5 +22,5 @@
   {"id": "T11", "category": "dogfood", "description": "工具包自己的交接包(AGENTS/CLAUDE/PROGRESS/feature_list)",
    "priority": "medium", "steps": ["AGENTS 为 SSOT", "CLAUDE 指针", "PROGRESS 追加", "本清单"], "passes": true},
   {"id": "T12", "category": "automation", "description": "把 guardian 挂成定时/自动触发(本地执行,访问本地项目)",
-   "priority": "medium", "steps": ["选机制:本地计划任务 / SessionStart / 云端只做调研PR", "定 cadence", "定自主度(报告 vs 自动提交)"], "passes": false}
+   "priority": "medium", "steps": ["选机制:本地计划任务 / SessionStart / 云端只做调研PR", "定 cadence", "定自主度(报告 vs 自动提交)"], "passes": true}
 ]

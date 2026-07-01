@@ -4,6 +4,12 @@
 
 ---
 
+## [2026-07-01] Option B 上线 + 脱敏公开发布 + 实测收尾
+- **做了:** Option B = 项目级 `.claude/settings.json` 的 SessionStart 钩子 —— 打开本工具包自动跑 `scripts/guardian.py`(自检+校对+方法论提醒)。公开仓库**脱敏**:去掉具体项目/考试名 → 通用描述;因之前推过带名旧 commit,**压成单一干净 commit `bfd57a8` + force-push**,origin 现仅 1 commit(GitHub API 确认),仍可 clone 即用。
+- **状态:** done。`feature_list` T12 → **passes:true**(经 SessionStart 自动触发,非 cron 定时)。
+- **实测(本次收尾即测试):** 本会话开场两个 SessionStart 钩子**均自动触发** —— 全局钩子 surface PROGRESS 顶部;Option B guardian 自检全绿、项目A LOW(0)、项目B MEDIUM(4)。guardian **自动逮到项目B 有 6 处未提交**(其自身会话正在开发),正是"每次运行校对两项目"的预期行为 —— 归 **该项目自己的窗口** 自行 `/handoff`,本工具包不碰其文件(边界)。
+- **下一步(可选):** 更强的定时(本地计划任务 / 云端调研 PR)留白;距 `.methodology_review` 满 30 天再跑 `/toolkit-refresh`。
+
 ## [2026-06-30] 自维护:guardian 自检 + 项目校对 + 方法论提醒
 - **做了:** `scripts/guardian.py`(①工具包自检 ②校对 watched 项目跑 audit ③方法论到期提醒)+ `/toolkit-check`、`/toolkit-refresh` 命令 + 本工具包**自己的交接包**(AGENTS/CLAUDE/PROGRESS/feature_list,dogfood)。`watched_projects.txt`(gitignore,含 English/French)+ `.methodology_review` 日期戳。
 - **状态:** done。guardian 实测:自检全绿;English LOW(0)、French LOW(3=已追踪的硬编码路径);方法论未到期。
