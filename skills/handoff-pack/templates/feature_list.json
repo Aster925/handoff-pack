@@ -1,0 +1,25 @@
+[
+  {
+    "id": "F1",
+    "category": "functional",
+    "description": "<一句话描述某个端到端功能 / one-line e2e feature>",
+    "priority": "high",
+    "steps": [
+      "Step 1: <用户/系统做什么>",
+      "Step 2: <...>",
+      "Verify: <可观察的预期结果 expected observable result>"
+    ],
+    "passes": false
+  },
+  {
+    "id": "F2",
+    "category": "functional",
+    "description": "<下一个功能 / next feature>",
+    "priority": "medium",
+    "steps": [
+      "Step 1",
+      "Verify: <expected result>"
+    ],
+    "passes": false
+  }
+]

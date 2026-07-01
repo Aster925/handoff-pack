@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["scripts/guardian.py"],
+            "timeout": 60,
+            "statusMessage": "handoff-pack guardian: 自检 + 项目校对"
+          }
+        ]
+      }
+    ]
+  }
+}

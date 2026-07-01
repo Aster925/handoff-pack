@@ -1,0 +1,7 @@
+# watched_projects.txt —— guardian.py 每次校对的项目清单(一行一个绝对路径)。
+# 复制本文件为 watched_projects.txt 并填入你的项目;真实文件已 gitignore,不会进公开仓库。
+# 用正斜杠或反斜杠都行;以 # 开头的行忽略。
+#
+# 示例 / examples:
+# C:/path/to/your/project-a
+# C:/path/to/your/project-b

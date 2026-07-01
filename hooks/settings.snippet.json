@@ -1,0 +1,31 @@
+{
+  "_comment": "把这个 hooks 块合并进 ~/.claude/settings.json(全局)。注意:exec 的 args 不展开 ~,请把路径换成你机器上的绝对路径,如 C:/Users/<你>/.claude/hooks/handoff_hook.py。脚本在无交接包的项目里自动静默。",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["~/.claude/hooks/handoff_hook.py", "session-start"],
+            "timeout": 10,
+            "statusMessage": "handoff-pack: 读取上次进度"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["~/.claude/hooks/handoff_hook.py", "pre-compact"],
+            "timeout": 10,
+            "statusMessage": "handoff-pack: 交接提醒"
+          }
+        ]
+      }
+    ]
+  }
+}

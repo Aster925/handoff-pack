@@ -1,0 +1,18 @@
+# .gitattributes — 统一换行符,避免跨平台噪声 diff
+# Normalize line endings to avoid CRLF/LF churn across Windows ↔ macOS/Linux.
+
+* text=auto eol=lf
+
+# 必须保持 CRLF 的 Windows 脚本 / Windows scripts that must keep CRLF:
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+# PowerShell 通常 LF 即可;如团队需要可改 crlf
+*.ps1   text eol=lf
+
+# 二进制文件不要做行尾转换 / never touch binaries:
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.pdf   binary
+*.zip   binary
+*.lockb binary

@@ -1,0 +1,15 @@
+# 本地 Claude Code 设置(机器特定的权限/路径,不公开)
+.claude/settings.local.json
+
+# 本地看护清单(含个人项目绝对路径,不进公开仓库;只提交 .example)
+watched_projects.txt
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / 编辑器杂项
+.DS_Store
+Thumbs.db
+*.tmp
+*~
