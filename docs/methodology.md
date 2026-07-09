@@ -71,17 +71,22 @@ agent 没按原意复现,出现"思考漂移"或遗漏。
 
 ---
 
-## 6. 2026 现状对照 / Alignment with current practice（复核于 2026-06）
+## 6. 2026 现状对照 / Alignment with current practice（复核于 2026-07）
 
 把本工具包对照 2026 年中的最新官方/学术实践复核,结论:**设计与现行最佳实践一致**,并明确与新平台能力的关系。
 
-- **SKILL.md 规范 — 合规。** 仅 `name`+`description` 必填(`name` 小写连字符、≤64、不含保留词 "claude/anthropic"、与文件夹同名;`description` ≤1024、第三人称、**禁用尖括号 `<>`** 以防注入);body 应 <500 行 + 渐进披露(细节下沉子文件,引用一层深)。本 skill 全部满足。[6][7]
+- **SKILL.md 规范 — 合规。** 仅 `name`+`description` 必填(`name` 小写连字符、≤64、不含保留词 "claude/anthropic"、与文件夹同名;`description` ≤1024、第三人称、**禁用尖括号 `<>`** 以防注入);body 应 <500 行 + 渐进披露(细节下沉子文件,引用一层深)。本 skill 全部满足。2026-07 复核:核心规范无变化,新增若干**可选** frontmatter 字段(如 `disallowed-tools`),不影响合规性。[6][7]
 - **AGENTS.md 为先 = 2026 共识。** "AGENTS.md 作 canonical 单一真相来源,CLAUDE.md 用 `@AGENTS.md` 导入(或 `ln -s AGENTS.md CLAUDE.md` 软链),Claude 专属内容极简。" 本工具包正是此法。注意**文件要短**:前沿模型可靠遵循约 150–200 条指令,每行都在抢这预算 → AGENTS.md 宜精炼、用指针。[8]
 - **PROGRESS.md = Anthropic 自用模式。** 其长任务 harness 即用 `claude-progress.txt` + git history 让新 context 快速接上工作状态;本工具包 `PROGRESS.md` 同此。[2]
-- **与平台「记忆工具 / 上下文编辑」的关系(2026 新增,互补不冲突)。** Anthropic 2026 推出 file-based **memory tool** + 自动 **context editing / compaction**(近上限自动清理陈旧工具调用,实测降 token ~84%)。二者层次不同:
+- **与平台「记忆工具 / 上下文编辑」的关系(2026 新增,互补不冲突)。** Anthropic 2026 推出 file-based **memory tool**(Messages API 已 GA)+ 自动 **context editing / compaction**(近上限自动清理陈旧工具调用,实测降 token ~84%;服务端自动 compaction 已产品化)。二者层次不同:
   - 平台 memory / context-editing = **运行时、每工作区、基础设施层**的临时记忆 + 自动压缩(API / Managed Agents)。
   - `AGENTS.md` / `PROGRESS.md` / `feature_list.json` = **进 git、可移植、人和任何工具都能读**的持久"唯一真相来源"层。
   - 实践要点:即便开了自动 compaction,**仍要在压缩/结束前把进度落盘到 `PROGRESS.md`** —— 自动清理的是上下文窗口,不是你的仓库;跨机器、跨工具、交接给人时,**只有 git 里的浓缩状态能被带走**。[9][10]
+- **MEMORY.md(auto-memory)与 git 层的边界(2026-07 增补)。** Claude Code 的 auto-memory(`MEMORY.md`,已默认开启)是 **agent 私有、按项目、不进 git** 的偏好/事实记忆,换机器、换工具、交接给人时带不走,不能替代交接包。分层规则:**用户偏好与工作习惯进 MEMORY,项目真相(意图/架构/进度/边界)进 `AGENTS.md`/`PROGRESS.md`**,两层不混写、不互相复制。[11]
+- **压缩会丢约束 →「约束重注入 / constraint pinning」(2026-07 增补,已落地)。** 《Governance Decay》跨 7 个模型家族实测:上下文压缩悄悄丢掉治理约束后,违反率从 0% 升至 ~30%;缓解法 = 把约束钉在有损压缩之外。随着服务端自动 compaction 普及,静默压缩越来越常见。本工具包对策:**PreCompact 钩子在压缩前重注入目标项目 `AGENTS.md` 的「边界」小节原文**(`hooks/handoff_hook.py`),而不只是提醒保存进度。[12]
+- **会话内恢复层与 fresh-context 循环 —— 外部互证(2026-07 增补)。** Claude Code 的 checkpointing + `/rewind` 是**会话内**恢复层,可回退误操作但不可移植、不进 git;而长任务 fresh-context 循环(Ralph 模式,已官方插件化)以「文件 + git 为唯一记忆」,其所需持久状态恰是 `PROGRESS.md` + `feature_list.json` 这类文件。两个方向共同印证:**git 里的浓缩状态才是可携带层**。[13][14]
+- **工具包自身当「带版本的依赖」管(2026-07 增补,已落地)。** Spec Kit v0.11+ 把工作流本身当依赖做升级检测/版本锁定;本工具包同理——安装方式是 `cp`,仓库更新后副本会静默过时。对策:**`guardian.py` 自检新增「安装副本同步」检查**(仓库源 ↔ `~/.claude/` 副本逐文件哈希比对),工具包自己也纳入防漂移。[15]
+- **watch:AGENTS.md v1.1 提案(未合并,暂不采纳)。** Issue #135 拟规范 precedence 链(就近覆盖、累加语义)与可选 YAML frontmatter(渐进披露);部分工具已前向兼容解析。等标准合并后再评估模板是否跟进 —— 不追未定标准。[16]
 
 ---
 
@@ -103,7 +108,19 @@ agent 没按原意复现,出现"思考漂移"或遗漏。
    https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 8. *AGENTS.md vs CLAUDE.md*（2026 共识:AGENTS.md 为 canonical + CLAUDE.md @import / symlink；AAIF / Linux Foundation 标准）
    https://agents.md
-9. Claude Platform Docs — *Memory tool*（file-based 持久记忆,2026 public beta）
+9. Claude Platform Docs — *Memory tool*（file-based 持久记忆;Messages API 已 GA）
    https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool
 10. Anthropic — *Managing context on the Claude Developer Platform*（context editing + memory,2026）
     https://anthropic.com/news/context-management
+11. Claude Code Docs — *Memory*（auto-memory / MEMORY.md,agent 私有层）
+    https://code.claude.com/docs/en/memory
+12. *Governance Decay*（压缩丢约束 → 违反率 0%→~30%;constraint pinning。arXiv 2606.22528, 2026-06）
+    https://arxiv.org/abs/2606.22528
+13. Claude Code Docs — *Checkpointing*（会话内 checkpoint + /rewind,不可移植）
+    https://code.claude.com/docs/en/checkpointing
+14. Ralph Wiggum pattern（fresh-context 长任务循环;文件 + git 为唯一记忆,官方插件化）
+    https://awesomeclaude.ai/ralph-wiggum
+15. GitHub Spec Kit — Releases(v0.11+:workflow 本身当带版本的依赖,升级检测)
+    https://github.com/github/spec-kit/releases
+16. AGENTS.md v1.1 提案(precedence 链 + 可选 frontmatter;Issue #135,未合并)
+    https://github.com/agentsmd/agents.md/issues/135

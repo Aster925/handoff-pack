@@ -3,14 +3,16 @@
 guardian.py — handoff-pack 自检 + 项目校对 + 方法论刷新提醒。
 
 每次运行做三件事(顺序即优先级):
-  1) 工具包自检(**稳固性优先**):scaffold / 模板 / audit / 钩子 都能跑。失败先修工具包。
+  1) 工具包自检(**稳固性优先**):scaffold / 模板 / audit / 钩子 都能跑;
+     且**已安装副本(~/.claude/…)与仓库一致** —— 安装方式是 cp,仓库改了副本不会跟着改,
+     工具包自己也会漂移(Spec Kit "workflow as versioned dependency" 同理)。失败先修工具包。
   2) 校对被看护项目:对 watched_projects.txt 里每个项目跑 drift_audit,报风险 + 是否还守着交接包。
   3) 方法论刷新提醒:距上次复核 >= REVIEW_DAYS 天则提示跑 /toolkit-refresh 调研最新方案。
 
 零第三方依赖(stdlib),跨平台。用法:python scripts/guardian.py
 """
 from __future__ import annotations
-import sys, os, json, subprocess, tempfile, shutil
+import sys, os, json, hashlib, subprocess, tempfile, shutil
 from pathlib import Path
 from datetime import datetime
 
@@ -61,6 +63,56 @@ def selftest() -> list[tuple[str, bool, str]]:
     return checks
 
 
+def _sha(p: Path) -> str:
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def _iter_files(root: Path):
+    for f in sorted(root.rglob("*")):
+        if f.is_file() and "__pycache__" not in f.parts:
+            yield f
+
+
+def install_drift() -> list[tuple[str, bool, str]]:
+    """比对仓库源 ↔ 已安装副本(~/.claude/…)。未安装 → 跳过(OK);不同步 → FAIL 提示重装。"""
+    home = Path.home() / ".claude"
+    checks: list[tuple[str, bool, str]] = []
+
+    # 目录整体比对:skill;单文件比对:hook
+    targets: list[tuple[str, Path, Path]] = [
+        ("skill 安装副本同步", ROOT / "skills" / "handoff-pack", home / "skills" / "handoff-pack"),
+        ("hook 安装副本同步", HOOK, home / "hooks" / HOOK.name),
+    ]
+    for name, src, dst in targets:
+        if not dst.exists():
+            checks.append((name, True, "未安装(跳过)"))
+            continue
+        if src.is_file():
+            diffs = [] if _sha(src) == _sha(dst) else [src.name]
+        else:
+            diffs = [f.relative_to(src).as_posix() for f in _iter_files(src)
+                     if not (dst / f.relative_to(src)).exists() or _sha(f) != _sha(dst / f.relative_to(src))]
+        if diffs:
+            checks.append((name, False, f"{len(diffs)} 处不同步(改仓库后需重装): " + ", ".join(diffs[:3])))
+        else:
+            checks.append((name, True, ""))
+
+    # commands:逐文件,只比对已安装过的
+    diffs, seen = [], False
+    for f in sorted((ROOT / "commands").glob("*.md")):
+        g = home / "commands" / f.name
+        if g.exists():
+            seen = True
+            if _sha(f) != _sha(g):
+                diffs.append(f.name)
+    if not seen:
+        checks.append(("commands 安装副本同步", True, "未安装(跳过)"))
+    else:
+        checks.append(("commands 安装副本同步", not diffs,
+                       (f"{len(diffs)} 个命令不同步: " + ", ".join(diffs)) if diffs else ""))
+    return checks
+
+
 def watched() -> tuple[list[str], str | None]:
     for name in ("watched_projects.txt", "watched_projects.example.txt"):
         f = ROOT / name
@@ -91,7 +143,7 @@ def main() -> int:
     print(bar + f"\n  handoff-pack Guardian — 自检 + 项目校对\n  {datetime.now():%Y-%m-%d %H:%M}\n" + bar)
 
     print("\n[1] 工具包自检(稳固性优先)")
-    st = selftest()
+    st = selftest() + install_drift()
     all_ok = all(ok for _, ok, _ in st)
     for name, ok, note in st:
         print(f"    {'OK ' if ok else 'FAIL'} {name}{('  · ' + note) if note else ''}")

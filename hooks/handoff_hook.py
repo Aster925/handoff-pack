@@ -4,7 +4,9 @@ handoff_hook.py — handoff-pack 全局钩子 (SessionStart / PreCompact)。
 
 在**有交接包**(存在 AGENTS.md 或 PROGRESS.md)的项目里:
   - session-start: 提醒开场例程 + 摘录 PROGRESS 顶部,让 agent 一开口就知道"上次做到哪"。
-  - pre-compact:   上下文压缩前提醒"先 /handoff 保存交接",避免进度只留在被清理的上下文里。
+  - pre-compact:   上下文压缩前提醒"先 /handoff 保存交接",避免进度只留在被清理的上下文里;
+                   并**重注入 AGENTS.md 的「边界」小节**(constraint pinning)——压缩会悄悄丢约束,
+                   丢约束后违反率显著上升(arXiv 2606.22528),故把边界原文钉回上下文。
 在**没有交接包**的项目里:完全静默(不打扰)。
 
 由 ~/.claude/settings.json 的 hooks 调用:
@@ -12,10 +14,12 @@ handoff_hook.py — handoff-pack 全局钩子 (SessionStart / PreCompact)。
   python <this> pre-compact       (PreCompact 事件)
 钩子输入 JSON 从 stdin 传入(含 cwd);输出到 stdout 会被并入会话上下文。
 """
-import sys, os, json
+import sys, os, re, json
 from pathlib import Path
 
 PROGRESS_CANDIDATES = ("PROGRESS.md", "docs/PROGRESS.md", "claude-progress.txt", "PROGRESS.txt")
+BOUNDARY_HEADING = re.compile(r"boundar|边界|red.?line|红线|do\s+not", re.IGNORECASE)
+BOUNDARY_MAX_CHARS = 2000  # 防止把超长小节整个灌进上下文
 
 
 def find_progress(cwd: Path):
@@ -24,6 +28,30 @@ def find_progress(cwd: Path):
         if p.exists():
             return p
     return None
+
+
+def extract_boundaries(agents_md: Path) -> str:
+    """从 AGENTS.md 提取「边界 / Boundaries」小节原文(constraint pinning)。
+
+    找第一个标题含 边界/boundaries/红线/do NOT 的小节,取到下一个同级或更高级标题为止。
+    找不到 / 读不了 → 返回空串(调用方静默跳过,保持原行为)。
+    """
+    try:
+        lines = agents_md.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except Exception:
+        return ""
+    out: list[str] = []
+    level = 0
+    for line in lines:
+        m = re.match(r"^(#{1,6})\s+(.*)", line)
+        if out:
+            if m and len(m.group(1)) <= level:
+                break
+            out.append(line)
+        elif m and BOUNDARY_HEADING.search(m.group(2)):
+            level = len(m.group(1))
+            out.append(line)
+    return "\n".join(out).strip()[:BOUNDARY_MAX_CHARS]
 
 
 def main():
@@ -52,6 +80,10 @@ def main():
         print("[handoff-pack] 上下文即将压缩。请**先保存交接**再继续:运行 /handoff "
               "(在 PROGRESS.md 顶部追加一条 + 更新 feature_list 的 passes + 征得用户确认后 commit)。"
               "压缩清理的是上下文窗口,不是仓库 —— 不落盘的进度会丢。")
+        boundaries = extract_boundaries(cwd / "AGENTS.md") if has_agents else ""
+        if boundaries:
+            print("\n[handoff-pack] 约束重注入 / constraint pinning —— 压缩常会丢约束,"
+                  "以下 AGENTS.md 边界在压缩后**依然有效**,请继续遵守:\n" + boundaries)
         return
 
     # session-start

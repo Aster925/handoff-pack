@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-07-08] 方法论刷新 #1:constraint pinning + 安装副本防漂 + §6 增补
+- **做了:** `/toolkit-refresh` 全流程(2 个调研 subagent:Anthropic 官方 + 社区/学术,只收结论)。落地两项代码增强 + 文档增补:
+  - **A1 约束重注入**(`hooks/handoff_hook.py`):PreCompact 时从目标项目 AGENTS.md 提取「边界」小节原文重注入 —— 依据《Governance Decay》(arXiv 2606.22528):压缩丢约束后违反率 0%→~30%,缓解 = constraint pinning。实测:本仓库边界节完整钉回。
+  - **A2 安装副本同步检查**(`scripts/guardian.py` `install_drift()`):仓库源 ↔ `~/.claude/` 副本(skill 目录 / hook / commands)逐文件 sha256 比对;未安装则跳过。灵感:Spec Kit "workflow as versioned dependency"。实测:当场逮到刚改的 hook 未重装 → 重装后全绿(自检 4→7 项)。
+  - **B 文档**(`docs/methodology.md` §6 复核于 2026-07 + 参考文献 11–16):MEMORY.md(agent 私有)vs git 真相层的分层规则;Governance Decay;checkpointing//rewind 与 Ralph 循环互证"git 浓缩状态=可携带层";memory tool 转 GA;SKILL.md 新可选字段;watch AGENTS.md v1.1 提案(未合并,不追)。
+- **判为不采纳(有意):** Sonnet 5 1M context(与"降所需 context"正交)、feature_list 加 `depends_on`(碰"只改 passes"硬规则)、AGENTS.md frontmatter(标准未定)、subagent 自动 PR(与本包无接口)。
+- **状态:** done。guardian 全绿;`.methodology_review` → 2026-07-08。已同步安装副本(hook)。
+- **下一步:** 观察 A1 在真实 PreCompact 事件里的表现;AGENTS.md v1.1 合并后评估模板跟进;下次刷新 ≈ 2026-08-07。
+
 ## [2026-07-01] Option B 上线 + 脱敏公开发布 + 实测收尾
 - **做了:** Option B = 项目级 `.claude/settings.json` 的 SessionStart 钩子 —— 打开本工具包自动跑 `scripts/guardian.py`(自检+校对+方法论提醒)。公开仓库**脱敏**:去掉具体项目/考试名 → 通用描述;因之前推过带名旧 commit,**压成单一干净 commit `bfd57a8` + force-push**,origin 现仅 1 commit(GitHub API 确认),仍可 clone 即用。
 - **状态:** done。`feature_list` T12 → **passes:true**(经 SessionStart 自动触发,非 cron 定时)。
