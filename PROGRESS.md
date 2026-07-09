@@ -4,7 +4,12 @@
 
 ---
 
-## [2026-07-08] 方法论刷新 #1:constraint pinning + 安装副本防漂 + §6 增补
+## [2026-07-09] 授权代修法语项目防漂移结构(边界例外)+ 新失败模式反哺 skill
+- **背景:** 用户报告法语项目「handoff 后 LLM 不读固化流程就自己分析」,**明确授权本窗口校对纠错**(平时边界=只审计不动手,本次例外;实例=其 z15→z16 gated 事件)。
+- **诊断(三根因,互相放大):** ① 最关键铁律(零遗漏不丢不藏/先读canon)只活在 PROGRESS 深处 + agent 私有 memory —— 都不保证进新会话上下文;保证加载的 AGENTS.md 反而没有。② `MEMORY.md` 索引嵌 07-03 过期状态快照(内容副本)→ 新会话虚假知情,跳过读 PROGRESS。③ 其 CLAUDE.md 误称 memory 子文件"自动加载"(实际仅索引加载)。
+- **修复(法语仓库 `e6de544`,只动交接文档):** AGENTS.md 边界+2铁律 + 新增〈固化流程索引〉(8 类任务→先例脚本,指针逐一 Test-Path 核实)+ 开场例程"动手前查索引";CLAUDE.md 纠正记忆说明 + 根目录开会话提醒(发现 2 套子目录孤儿 memory);MEMORY.md 快照移出 → `tef-co-rebase-turnkey.md`。审计无回归;**提交时避开并行会话的 2 个未跟踪文件,只 add 自己改的 3 个**。
+- **反哺工具包(本 commit):** `workflows.md` audit 语义检查 +2 条通用化新失败模式 ——「铁律未进保证加载层」「记忆索引嵌状态快照=虚假知情」。
+- **下一步:** 观察法语项目后续 session 是否守〈固化流程索引〉;评估 drift_audit 可否脚本化"索引 vs PROGRESS 新鲜度"信号。
 - **做了:** `/toolkit-refresh` 全流程(2 个调研 subagent:Anthropic 官方 + 社区/学术,只收结论)。落地两项代码增强 + 文档增补:
   - **A1 约束重注入**(`hooks/handoff_hook.py`):PreCompact 时从目标项目 AGENTS.md 提取「边界」小节原文重注入 —— 依据《Governance Decay》(arXiv 2606.22528):压缩丢约束后违反率 0%→~30%,缓解 = constraint pinning。实测:本仓库边界节完整钉回。
   - **A2 安装副本同步检查**(`scripts/guardian.py` `install_drift()`):仓库源 ↔ `~/.claude/` 副本(skill 目录 / hook / commands)逐文件 sha256 比对;未安装则跳过。灵感:Spec Kit "workflow as versioned dependency"。实测:当场逮到刚改的 hook 未重装 → 重装后全绿(自检 4→7 项)。
