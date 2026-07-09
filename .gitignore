@@ -4,6 +4,9 @@
 # 本地看护清单(含个人项目绝对路径,不进公开仓库;只提交 .example)
 watched_projects.txt
 
+# 个人用会话提示词(含被看护项目细节,公开仓库已脱敏,不进库)
+会话提示词_三段论.md
+
 # Python
 __pycache__/
 *.pyc
