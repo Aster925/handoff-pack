@@ -4,7 +4,12 @@
 
 ---
 
-## [2026-07-09 b] 防漂移二期:钩子升级(双节钉回+编码修复)+ 法语四层防线补全
+## [2026-07-10] 视频库子项目 handoff 强化(嵌套交接包模式首例)
+- **任务:** 用户令强化法语仓库内 `视频库/` 子项目(学外语,借用 dashboard 一个板块)的 handoff,避免与母项目冲突。授权代做。
+- **现场:** 子项目已被其 z25–z31/L1 会话建成半独立(CLAUDE/PROGRESS/README/start.ps1/launch.json 俱在,父侧边界已标注——初次 grep 假阴性曾误判"谎报",复核推翻,查证优于假设)。真缺口 3 个:①真相全在 CLAUDE.md(工具特定);②canon 钉行在子目录会话相对路径必报错 + TEF 语境误注入;③PreCompact 对子项目无 AGENTS.md 可钉。
+- **修复(法语仓库 `bacef6f`+`60c1093`):** **嵌套 AGENTS.md**(closest wins;小节名对齐钉回正则→PreCompact 自动钉子项目自己的边界+固化流程,实测 898 字符无母项目误注入);CLAUDE 瘦身薄指针;canon 改 **settings.json 内联 -c 按 cwd 分流**(根=TEF/子项目=lang,双场景 rc=0),删 canon_pin.py(单一副本);提示词手册 +①b 视频库开场。
+- **方法论:** §6 更新 canon 实装描述 + 新增「monorepo 子项目嵌套 AGENTS + 小节名对齐钉回正则」模式。
+- **下一步:** 观察子项目会话是否守 L# 协议;法语仓库累计多笔未 push(用户批量决定)。
 - **一期实证:** 法语 z21 会话(TEST1/2/3 OCR 入库)完整遵守新协议——承 canon、新流程主动补进〈固化流程索引〉、纠正旧漂移误判。结构生效。
 - **钩子升级(`hooks/handoff_hook.py`):** ① PreCompact 钉回从「边界」扩为**「边界」+「固化流程索引」**(extract_pins,每节 2000 字符上限);② **修真 bug**:stdin 按 Windows 本地编码(GBK)解码会把 BOM/含中文的 cwd 解成垃圾 → json 失败 → **静默回退错误目录**(昨日 A1 测试"通过"实为回退目录侥幸命中)→ 改 `utf-8-sig` + lstrip BOM 双保险;实测 no-BOM/with-BOM 均正确钉回法语两节(2739 字符)。已同步安装副本。
 - **法语四层防线(其仓库 `f3e3e17`,授权代做):** ①载入层 CLAUDE@AGENTS(z20)②开场层全局 SessionStart(已有)③压缩层双节钉回(本次)④**回合层新增**:项目级 UserPromptSubmit → `canon_pin.py` 每回合钉一行 canon(治注意力衰减)。+ `docs/会话提示词_防漂移.md`(用户手动开场/收尾/纠偏三段提示词)。
