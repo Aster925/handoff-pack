@@ -43,8 +43,11 @@ def find_backlog(cwd: Path):
     return None
 
 
-def extract_section(lines: list, heading_re) -> str:
-    """提取第一个标题命中 heading_re 的小节原文,到下一个同级或更高级标题为止。"""
+def extract_section(lines: list, heading_re, min_level: int = 1) -> str:
+    """提取第一个标题命中 heading_re 的小节原文,到下一个同级或更高级标题为止。
+
+    min_level:起始匹配的最小标题级别(如 2 = 跳过 H1 —— 文件大标题常含关键词,会误截文件头)。
+    """
     out: list = []
     level = 0
     for line in lines:
@@ -53,7 +56,7 @@ def extract_section(lines: list, heading_re) -> str:
             if m and len(m.group(1)) <= level:
                 break
             out.append(line)
-        elif m and heading_re.search(m.group(2)):
+        elif m and len(m.group(1)) >= min_level and heading_re.search(m.group(2)):
             level = len(m.group(1))
             out.append(line)
     return "\n".join(out).strip()[:PIN_MAX_CHARS]
@@ -130,7 +133,8 @@ def main():
                    "PROGRESS 超长勿只截开头。")
         try:
             open_sec = extract_section(
-                backlog.read_text(encoding="utf-8", errors="ignore").splitlines(), OPEN_HEADING)
+                backlog.read_text(encoding="utf-8", errors="ignore").splitlines(), OPEN_HEADING,
+                min_level=2)
             if open_sec:
                 out.append("  —— BACKLOG OPEN 摘录 ——")
                 out.extend("  " + l for l in open_sec.splitlines()[:15])
