@@ -3,6 +3,8 @@
 > 这是项目的**持久记忆 (durable memory)** —— 结构化笔记 (structured note-taking)。
 > 每个 session 结束**追加**一条 (最新在最上)。不要删旧记录;它是给下一个 agent 的交接。
 > 只写"裸代码看不出"的东西:意图、决策理由、卡点、下一步。
+> ⚠ **本文件会随时间超过单次可读上限**(Read 单次 ~25k tokens):新 session **勿只截开头**;
+> 「下一步/待办」不要只散落在这里 —— 同步登记 [`BACKLOG.md`](BACKLOG.md)(**待办唯一账本**,永远短到一口气读完)。
 
 <!-- 复制下面这块作为新条目 / copy this block for each new entry -->
 

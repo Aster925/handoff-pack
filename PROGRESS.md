@@ -4,7 +4,11 @@
 
 ---
 
-## [2026-07-10] 视频库子项目 handoff 强化(嵌套交接包模式首例)
+## [2026-07-12] 账本与日志分离(BACKLOG.md)通用化 — 法语 z41 实战方案采纳入通用层
+- **来源与判定:** 用户带回法语 z41 方案并问是否可行。判定**可行且正确**:PROGRESS 41k tokens > Read 单次 ~25k,「要求通读」**物理不可执行** → 新会话只截开头自行构建(其 z15/z27 实案)。解法=账本与日志分离,与 beads 同构的 markdown 轻量版(7 月调研曾以"规模用不上"缓议,实战翻案,认账)。
+- **落地(通用层,B2 两件都在内):** ①模板新增 `BACKLOG.md`(OPEN/常设裁定/CLOSED,三铁律)+ PROGRESS 模板头部自述 + AGENTS 模板(工作规则/开场读账本/相关文件);②`drift_audit.py`:scaffold 9→10 文件 + 新检查 `check_backlog_ledger`(PROGRESS ≥30k 字符且无 BACKLOG → medium);③钩子:SessionStart **加印 BACKLOG OPEN 摘录**+账本规则行(超长无账本则警示),PreCompact 提醒含账本同步;④`/handoff` 命令新增**步骤 3 同步账本**(登记/关闭/回写凭据);⑤SKILL 六产物表+硬规则、workflows 审计语义检查+收尾步骤+「日志可长账本必短」原则、methodology §6 增补+ref[17] beads;⑥三段论提示词 ①复述 OPEN 项/②同步账本。
+- **实测:** 法语根 SessionStart 印出 OPEN(B1/B2)✓;审计检查:35k 字符无账本→finding、建账本→消失 ✓;guardian 全绿(scaffold 10,安装副本已同步);**新检查当场逮到 English(日志超长无账本,MEDIUM)**——归其窗口自建。
+- **下一步:** 法语 BACKLOG B2 以本 commit 为凭据关闭;English 窗口下次 `/handoff` 建账本+清过期日志;观察"复述 OPEN 项"开场在实战中的拦截率。
 - **任务:** 用户令强化法语仓库内 `视频库/` 子项目(学外语,借用 dashboard 一个板块)的 handoff,避免与母项目冲突。授权代做。
 - **现场:** 子项目已被其 z25–z31/L1 会话建成半独立(CLAUDE/PROGRESS/README/start.ps1/launch.json 俱在,父侧边界已标注——初次 grep 假阴性曾误判"谎报",复核推翻,查证优于假设)。真缺口 3 个:①真相全在 CLAUDE.md(工具特定);②canon 钉行在子目录会话相对路径必报错 + TEF 语境误注入;③PreCompact 对子项目无 AGENTS.md 可钉。
 - **修复(法语仓库 `bacef6f`+`60c1093`):** **嵌套 AGENTS.md**(closest wins;小节名对齐钉回正则→PreCompact 自动钉子项目自己的边界+固化流程,实测 898 字符无母项目误注入);CLAUDE 瘦身薄指针;canon 改 **settings.json 内联 -c 按 cwd 分流**(根=TEF/子项目=lang,双场景 rc=0),删 canon_pin.py(单一副本);提示词手册 +①b 视频库开场。

@@ -47,6 +47,7 @@ SCAFFOLD_MAP = {
     "CLAUDE.md": "CLAUDE.md",
     "feature_list.json": "feature_list.json",
     "PROGRESS.md": "PROGRESS.md",
+    "BACKLOG.md": "BACKLOG.md",
     "HANDOFF.md": "HANDOFF.md",
     "init.sh": "init.sh",
     "init.ps1": "init.ps1",
@@ -240,6 +241,30 @@ def check_progress_freshness(root: Path, rep: Report) -> None:
                 fix="结束 session 前更新 PROGRESS.md,使其反映最新进度。")
 
 
+BACKLOG_CANDIDATES = ["BACKLOG.md", "docs/BACKLOG.md"]
+# 叙事日志超过此字符数后,"通读"开始不可靠(Read 单次 ~25k tokens),需要账本兜底
+LEDGER_PROGRESS_CHARS = 30_000
+
+
+def check_backlog_ledger(root: Path, rep: Report) -> None:
+    """账本与日志分离:超长 PROGRESS 而无 BACKLOG 账本 = "只截开头"漂移温床。"""
+    progress = find_progress(root)
+    if progress is None:
+        return
+    try:
+        size = len(progress.read_text(encoding="utf-8", errors="ignore"))
+    except Exception:
+        return
+    has_backlog = any((root / rel).exists() for rel in BACKLOG_CANDIDATES)
+    if size >= LEDGER_PROGRESS_CHARS and not has_backlog:
+        rep.add(category="artifacts", severity="medium",
+                title="日志超长且无待办账本 / Long log, no backlog ledger",
+                detail=f"{progress.name} 已 {size:,} 字符 —— 超过单次可读上限后'通读'物理不可执行,"
+                       "「下一步/待办」散落正文必被截断遗漏,新 session 会只读开头就自行开工。",
+                fix="账本与日志分离:scaffold 生成 BACKLOG.md(<100 行:OPEN/常设裁定/CLOSED),"
+                    "待办只登记账本;宣布「完成/无缺口」前 OPEN 须清空。")
+
+
 def check_dependencies(root: Path, rep: Report) -> None:
     """Lockfiles + pinned versions."""
     py_manifest = (root / "requirements.txt").exists() or (root / "pyproject.toml").exists()
@@ -365,6 +390,7 @@ def check_git_state(root: Path, rep: Report) -> None:
 CHECKS = [
     check_artifacts,
     check_progress_freshness,
+    check_backlog_ledger,
     check_dependencies,
     check_secrets_and_artifacts,
     check_portability,

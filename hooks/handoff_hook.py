@@ -19,6 +19,9 @@ import sys, os, re, json
 from pathlib import Path
 
 PROGRESS_CANDIDATES = ("PROGRESS.md", "docs/PROGRESS.md", "claude-progress.txt", "PROGRESS.txt")
+BACKLOG_CANDIDATES = ("BACKLOG.md", "docs/BACKLOG.md")
+OPEN_HEADING = re.compile(r"OPEN|待办|开放", re.IGNORECASE)
+LEDGER_PROGRESS_CHARS = 30_000  # 日志超此长度,"通读"不可靠 → 提示拆账本
 BOUNDARY_HEADING = re.compile(r"boundar|边界|red.?line|红线|do\s+not", re.IGNORECASE)
 CANON_HEADING = re.compile(r"固化流程|固化裁定|canonical\s*workflows?|fixed\s*rulings", re.IGNORECASE)
 PIN_MAX_CHARS = 2000  # 每节上限,防止把超长小节整个灌进上下文
@@ -26,6 +29,14 @@ PIN_MAX_CHARS = 2000  # 每节上限,防止把超长小节整个灌进上下文
 
 def find_progress(cwd: Path):
     for rel in PROGRESS_CANDIDATES:
+        p = cwd / rel
+        if p.exists():
+            return p
+    return None
+
+
+def find_backlog(cwd: Path):
+    for rel in BACKLOG_CANDIDATES:
         p = cwd / rel
         if p.exists():
             return p
@@ -88,7 +99,8 @@ def main():
 
     if mode == "pre-compact":
         print("[handoff-pack] 上下文即将压缩。请**先保存交接**再继续:运行 /handoff "
-              "(在 PROGRESS.md 顶部追加一条 + 更新 feature_list 的 passes + 征得用户确认后 commit)。"
+              "(在 PROGRESS.md 顶部追加一条 + 同步 BACKLOG.md 登记/关闭(若有)"
+              "+ 更新 feature_list 的 passes + 征得用户确认后 commit)。"
               "压缩清理的是上下文窗口,不是仓库 —— 不落盘的进度会丢。")
         pins = extract_pins(cwd / "AGENTS.md") if has_agents else ""
         if pins:
@@ -109,6 +121,26 @@ def main():
             if snippet:
                 out.append("  —— PROGRESS 顶部摘录 ——")
                 out.extend("  " + l for l in snippet)
+        except Exception:
+            pass
+    backlog = find_backlog(cwd)
+    if backlog:
+        rel = backlog.relative_to(cwd).as_posix()
+        out.append(f"· **待办唯一账本 = {rel}**(短,先读完):宣布「完成/无缺口」前 OPEN 须清空或逐条说明;"
+                   "PROGRESS 超长勿只截开头。")
+        try:
+            open_sec = extract_section(
+                backlog.read_text(encoding="utf-8", errors="ignore").splitlines(), OPEN_HEADING)
+            if open_sec:
+                out.append("  —— BACKLOG OPEN 摘录 ——")
+                out.extend("  " + l for l in open_sec.splitlines()[:15])
+        except Exception:
+            pass
+    elif progress is not None:
+        try:
+            if len(progress.read_text(encoding="utf-8", errors="ignore")) >= LEDGER_PROGRESS_CHARS:
+                out.append("· ⚠ PROGRESS 已超单次可读上限且无 BACKLOG.md 账本 —— 「下一步/待办」散落正文"
+                           "会被截断遗漏;建议拆账本(handoff-pack scaffold 可生成模板)。")
         except Exception:
             pass
     out.append("· 结束、或发现 context 快满时,运行 /handoff 保存交接。")

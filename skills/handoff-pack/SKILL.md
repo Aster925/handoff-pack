@@ -25,13 +25,14 @@ description: >-
 > **解法不是扩 context,而是把「意图 / 架构 / 进度 / 运行方式」浓缩进几个仓库文件**,
 > 让任何新 session 在 context 限制内一读就懂、精准复现。
 
-落地成五个产物 (全部进 git):
+落地成六个产物 (全部进 git):
 
 | 文件 | 作用 | 治的漂移 |
 |---|---|---|
 | `AGENTS.md` | **唯一真相来源**:做什么/架构/怎么跑/边界/规则。跨工具可读 (Cursor/Copilot/Gemini)。 | 缺意图、缺架构 |
 | `CLAUDE.md` | 薄指针,`@AGENTS.md` + 仅 Claude 特有内容 | 工具特定差异 |
-| `PROGRESS.md` | 持久记忆 / 结构化笔记,每 session 追加 | 隐性进度丢失 |
+| `PROGRESS.md` | 持久记忆 / 结构化笔记,每 session 追加(叙事日志,可以长) | 隐性进度丢失 |
+| `BACKLOG.md` | **待办唯一账本**(<100 行:OPEN/常设裁定/CLOSED,只增不删) | 日志超可读上限被截读、「下一步」散落正文遗漏 |
 | `feature_list.json` | 功能清单,agent 只能改 `passes` | 过早宣布完工 |
 | `init.sh` + `init.ps1` | 一键重建环境并运行 (跨平台) | 换机器不知道怎么跑 |
 
@@ -71,7 +72,8 @@ python skills/handoff-pack/scripts/drift_audit.py scaffold "<TARGET>"
 - **`feature_list.json` 只允许改 `passes` 字段**;不得增删功能或改描述/步骤。
 - 标 `passes:true` 前**必须**实际跑通验证 (优先端到端,别只信单元测试/curl)。
 - 交接文档用**指针 (just-in-time)**:指向文件/路径/commit,**不要把内容粘进来**。
-- 一次只推进一个 feature;每 session 结束:干净 commit + `PROGRESS.md` 追加一条。
+- **账本与日志分离**:日志(PROGRESS)可以长,账本(`BACKLOG.md`)必须短。「下一步/待/暂缓」必须登记 OPEN;**宣布「完成/无缺口」前 OPEN 须清空或逐条说明**;关闭回写 commit 凭据,只增不删。
+- 一次只推进一个 feature;每 session 结束:干净 commit + `PROGRESS.md` 追加一条 + 同步 `BACKLOG.md`。
 - 填模板时,凡是不确定的事实**先去代码/历史里查证**,查不到就在 HANDOFF 标为开放问题,**不要假设**。
 
 ## 本 skill 内含文件 / Files in this skill

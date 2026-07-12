@@ -10,12 +10,14 @@ description: 保存交接(防漂移):追加 PROGRESS.md 一条 + 更新 feature_
 1. 用 `git status --short` + `git diff --stat` + `git log --oneline -5` 搞清这次 session 改了什么、当前分支状态。
 2. 在 `PROGRESS.md`(或 `docs/PROGRESS.md`)**顶部**追加一条(最新在最上),按其模板写:**做了 / 状态 / 为什么 / 下一步 / 卡点**。
    - 真实内容;**指针优先** —— 写文件名、commit 短哈希,不要粘贴大段代码/内容。
-3. 如果有功能这次**已实际验证通过**,在 `feature_list.json` 把对应项的 `passes` 由 `false` 改成 `true`。**只改 `passes` 字段**;没有该文件就跳过。
-4. **提交前必须停下,等用户确认**:
-   - 列出你打算提交的**具体文件**(至少 `PROGRESS.md`;若改了则含 `feature_list.json` / `AGENTS.md`)。
+3. **同步待办账本 `BACKLOG.md`(若存在)**:本条产生的每个「下一步 / 待 / 暂缓 / 承诺」**逐条登记进 OPEN**;本次完成的 OPEN 项移入 CLOSED 并**回写凭据**(commit 短哈希/条目号)。**只增不删**。
+   - 若无此文件且 PROGRESS 已很长(≳30k 字符):建议用 handoff-pack 的 scaffold 生成 `BACKLOG.md` 并把散落的待办收拢进去(日志可长,账本必短)。
+4. 如果有功能这次**已实际验证通过**,在 `feature_list.json` 把对应项的 `passes` 由 `false` 改成 `true`。**只改 `passes` 字段**;没有该文件就跳过。
+5. **提交前必须停下,等用户确认**:
+   - 列出你打算提交的**具体文件**(至少 `PROGRESS.md`;若改了则含 `BACKLOG.md` / `feature_list.json` / `AGENTS.md`)。
    - 给出建议的 commit message(简明中文,说清这次做了什么)。
    - 用户确认后,执行 `git add <这些具体文件>`(**不要 `git add -A`** —— 用户常并发多窗口,避免卷入无关改动)再 `git commit`。
    - **不要 `git push`**,除非用户明确要求。
-5. 若用户还有其它未提交改动(不属于交接文件),提醒他单独处理,你不替他提交。
+6. 若用户还有其它未提交改动(不属于交接文件),提醒他单独处理,你不替他提交。
 
 目标:任何新 session 读完 `PROGRESS.md` 顶部 + `AGENTS.md` 就能精准接上,不漂移。

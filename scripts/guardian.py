@@ -42,7 +42,7 @@ def selftest() -> list[tuple[str, bool, str]]:
     try:
         _py(AUDIT, "scaffold", tmp)
         created = [p.name for p in tmp.iterdir()]
-        checks.append(("scaffold 落地 9 文件", len(created) >= 9, f"{len(created)} files"))
+        checks.append(("scaffold 落地 10 文件", len(created) >= 10, f"{len(created)} files"))
         fl = tmp / "feature_list.json"
         ok = False
         if fl.exists():

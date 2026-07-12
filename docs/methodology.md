@@ -86,6 +86,7 @@ agent 没按原意复现,出现"思考漂移"或遗漏。
 - **压缩会丢约束 →「约束重注入 / constraint pinning」(2026-07 增补,已落地)。** 《Governance Decay》跨 7 个模型家族实测:上下文压缩悄悄丢掉治理约束后,违反率从 0% 升至 ~30%;缓解法 = 把约束钉在有损压缩之外。随着服务端自动 compaction 普及,静默压缩越来越常见。本工具包对策:**PreCompact 钩子在压缩前重注入目标项目 `AGENTS.md` 的「边界」+「固化流程索引」小节原文**(`hooks/handoff_hook.py`),而不只是提醒保存进度。压缩之外还有**注意力衰减**(规则在上下文里但不再被注意):高风险项目可加**项目级 UserPromptSubmit 钩子每回合钉一行 canon**(指针+一句话铁律,不复制细节;实装先例:法语项目 `.claude/settings.json` **内联 -c 并按 cwd 分流**——仓库根与子项目各钉各的 canon,不依赖相对路径文件)。**monorepo 子项目**:嵌套 AGENTS.md(closest wins)+ 小节名对齐钉回正则(「边界」「固化流程」),PreCompact 即自动钉回子项目自己的约束。[12]
 - **会话内恢复层与 fresh-context 循环 —— 外部互证(2026-07 增补)。** Claude Code 的 checkpointing + `/rewind` 是**会话内**恢复层,可回退误操作但不可移植、不进 git;而长任务 fresh-context 循环(Ralph 模式,已官方插件化)以「文件 + git 为唯一记忆」,其所需持久状态恰是 `PROGRESS.md` + `feature_list.json` 这类文件。两个方向共同印证:**git 里的浓缩状态才是可携带层**。[13][14]
 - **工具包自身当「带版本的依赖」管(2026-07 增补,已落地)。** Spec Kit v0.11+ 把工作流本身当依赖做升级检测/版本锁定;本工具包同理——安装方式是 `cp`,仓库更新后副本会静默过时。对策:**`guardian.py` 自检新增「安装副本同步」检查**(仓库源 ↔ `~/.claude/` 副本逐文件哈希比对),工具包自己也纳入防漂移。[15]
+- **账本与日志分离 / ledger-journal split(2026-07-12 增补,实战倒逼)。** 叙事日志(PROGRESS)随项目做大必然超过单次工具读取上限(实测 41k tokens vs Read 单次 ~25k)——「要求通读」**物理不可执行**,agent 只能截开头再自行构建 → 反复漂移,加重语气的提示词治不了物理问题。解法:待办从日志拆出,`BACKLOG.md` 为**唯一账本**(<100 行:OPEN / 常设裁定 / CLOSED;登记-凭据-只增不删),**宣布「完成/无缺口」的前置 = OPEN 清空或逐条说明**;深度审计类任务才要求分块通读全文。与 beads(git-backed 任务账本)同一洞察的 markdown 轻量版(7 月曾以"规模用不上"缓议,被实战翻案)。挂载五层:AGENTS 规则 / PROGRESS 头部自述 / SessionStart 摘录 OPEN / canon 每回合钉 / 用户开场提示词要求复述 OPEN 项(复述不出=没读,当场可抓)。[17]
 - **watch:AGENTS.md v1.1 提案(未合并,暂不采纳)。** Issue #135 拟规范 precedence 链(就近覆盖、累加语义)与可选 YAML frontmatter(渐进披露);部分工具已前向兼容解析。等标准合并后再评估模板是否跟进 —— 不追未定标准。[16]
 
 ---
@@ -124,3 +125,5 @@ agent 没按原意复现,出现"思考漂移"或遗漏。
     https://github.com/github/spec-kit/releases
 16. AGENTS.md v1.1 提案(precedence 链 + 可选 frontmatter;Issue #135,未合并)
     https://github.com/agentsmd/agents.md/issues/135
+17. Beads — git-backed, dependency-aware task ledger(Steve Yegge;账本与日志分离的重型版)
+    https://github.com/steveyegge/beads
