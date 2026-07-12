@@ -10,8 +10,8 @@
 - **实测:** 法语根 SessionStart 印出 OPEN(B1/B2)✓;审计检查:35k 字符无账本→finding、建账本→消失 ✓;guardian 全绿(scaffold 10,安装副本已同步);**新检查当场逮到 English(日志超长无账本,MEDIUM)**——归其窗口自建。
 - **下一步:** 法语 BACKLOG B2 以本 commit 为凭据关闭;English 窗口下次 `/handoff` 建账本+清过期日志;观察"复述 OPEN 项"开场在实战中的拦截率。
 - **任务:** 用户令强化法语仓库内 `视频库/` 子项目(学外语,借用 dashboard 一个板块)的 handoff,避免与母项目冲突。授权代做。
-- **现场:** 子项目已被其 z25–z31/L1 会话建成半独立(CLAUDE/PROGRESS/README/start.ps1/launch.json 俱在,父侧边界已标注——初次 grep 假阴性曾误判"谎报",复核推翻,查证优于假设)。真缺口 3 个:①真相全在 CLAUDE.md(工具特定);②canon 钉行在子目录会话相对路径必报错 + TEF 语境误注入;③PreCompact 对子项目无 AGENTS.md 可钉。
-- **修复(法语仓库 `bacef6f`+`60c1093`):** **嵌套 AGENTS.md**(closest wins;小节名对齐钉回正则→PreCompact 自动钉子项目自己的边界+固化流程,实测 898 字符无母项目误注入);CLAUDE 瘦身薄指针;canon 改 **settings.json 内联 -c 按 cwd 分流**(根=TEF/子项目=lang,双场景 rc=0),删 canon_pin.py(单一副本);提示词手册 +①b 视频库开场。
+- **现场:** 子项目已被其 z25–z31/L1 会话建成半独立(CLAUDE/PROGRESS/README/start.ps1/launch.json 俱在,父侧边界已标注——初次 grep 假阴性曾误判"谎报",复核推翻,查证优于假设)。真缺口 3 个:①真相全在 CLAUDE.md(工具特定);②canon 钉行在子目录会话相对路径必报错 + 母项目语境误注入;③PreCompact 对子项目无 AGENTS.md 可钉。
+- **修复(法语仓库 `bacef6f`+`60c1093`):** **嵌套 AGENTS.md**(closest wins;小节名对齐钉回正则→PreCompact 自动钉子项目自己的边界+固化流程,实测 898 字符无母项目误注入);CLAUDE 瘦身薄指针;canon 改 **settings.json 内联 -c 按 cwd 分流**(根=母项目/子项目各钉各的,双场景 rc=0),删 canon_pin.py(单一副本);提示词手册 +①b 视频库开场。
 - **方法论:** §6 更新 canon 实装描述 + 新增「monorepo 子项目嵌套 AGENTS + 小节名对齐钉回正则」模式。
 - **下一步:** 观察子项目会话是否守 L# 协议;法语仓库累计多笔未 push(用户批量决定)。
 - **一期实证:** 法语 z21 会话(TEST1/2/3 OCR 入库)完整遵守新协议——承 canon、新流程主动补进〈固化流程索引〉、纠正旧漂移误判。结构生效。
